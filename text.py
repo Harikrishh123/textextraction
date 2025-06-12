@@ -167,7 +167,7 @@ def main():
                 st.warning("Enter the input text!")
                 return
             tokenizer = AutoTokenizer.from_pretrained("t5-base")
-            model = AutoModelForSeq2SeqLM.from_pretrained("t5-base", low_cpu_mem_usage=False , torch_dtype=torch.float32)
+            model = AutoModelForSeq2SeqLM.from_pretrained("t5-base", device_map="auto" , torch_dtype=torch.float32)
             summary = abstractive_summarizer(text, model, tokenizer, num)
             st.header("Abstractive Summary :")
                 # print(summary)
