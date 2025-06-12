@@ -25,8 +25,8 @@ def abstractive_summarizer(text, num):
 
     input_text = "summarize: " + text.strip().replace("\n", " ")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
-    inputs = tokenizer.encode(input_text, return_tensors="pt", max_length=1024, truncation=True)
+    model = model.to(device)
+    inputs = tokenizer.encode(input_text, return_tensors="pt", max_length=1024, truncation=True).to(device)
 
     summary_ids = model.generate(inputs, max_length=max(500 , num*20), min_length= min(100 , num*15), length_penalty=2.0, num_beams=4, early_stopping=True)
 
