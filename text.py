@@ -20,8 +20,7 @@ import heapq
 
 def abstractive_summarizer(text, model, tokenizer, num):
     input_text = "summarize: " + text.strip().replace("\n", " ")
-
-
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     inputs = tokenizer.encode(input_text, return_tensors="pt", max_length=1024, truncation=True).to(device)
