@@ -16,7 +16,6 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import heapq
 
 
-
 def abstractive_summarizer(text, model, tokenizer, num):
     input_text = "summarize: " + text.strip().replace("\n", " ")
     
