@@ -3,7 +3,7 @@ os.environ["STREAMLIT_WATCH_FILE_SYSTEM"] = "false"
 
 import re , streamlit as st
 from collections import defaultdict
-import torch
+
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 
@@ -11,28 +11,29 @@ import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-
-from transformers import T5ForConditionalGeneration, T5Tokenizer
+import torch
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import heapq
 
 
-def abstractive_summarizer(text, num):
 
+
+def abstractive_summarizer(text, model, tokenizer, num):
     input_text = "summarize: " + text.strip().replace("\n", " ")
-    model = T5ForConditionalGeneration.from_pretrained("t5-small")
-    tokenizer = T5Tokenizer.from_pretrained("t5-small")
+
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     inputs = tokenizer.encode(input_text, return_tensors="pt", max_length=1024, truncation=True).to(device)
 
-    summary_ids = model.generate(inputs, max_length=max(500 , num*20), min_length= min(100 , num*15), length_penalty=2.0, num_beams=4, early_stopping=True)
+    summary_ids = model.generate(inputs, max_length=min(500 , num*20), min_length= min(50 , num*15), length_penalty=2.0, num_beams=4, early_stopping=True)
 
     summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     return summary
 
 def nltk_tokenizer(txt, num):
     nltk.download('punkt_tab')
-    nltk.download('stopwords')
+    nltk.download('stopwords')    
     freq = defaultdict(int)
     words = word_tokenize(txt)
     sentences = sent_tokenize(txt)
@@ -168,7 +169,9 @@ def main():
             if not txt.strip():
                 st.warning("Enter the input text!")
                 return
-            summary = abstractive_summarizer(text, num)
+            tokenizer = AutoTokenizer.from_pretrained("t5-base")
+            model = AutoModelForSeq2SeqLM.from_pretrained("t5-base")
+            summary = abstractive_summarizer(text, model, tokenizer, num)
             st.header("Abstractive Summary :")
                 # print(summary)
             st.write(summary)
@@ -176,10 +179,4 @@ def main():
 
 if __name__ == '__main__' :
     main()
-
-# txt = '''
-# Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-# '''
-
-# print(nltk_tokenizer(txt, 3))
     
