@@ -4,6 +4,7 @@ os.environ["STREAMLIT_WATCH_FILE_SYSTEM"] = "false"
 import re , streamlit as st
 from collections import defaultdict
 
+import torch
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 
@@ -23,6 +24,8 @@ tokenizer = T5Tokenizer.from_pretrained("t5-small")
 def abstractive_summarizer(text, num):
 
     input_text = "summarize: " + text.strip().replace("\n", " ")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
     inputs = tokenizer.encode(input_text, return_tensors="pt", max_length=1024, truncation=True)
 
     summary_ids = model.generate(inputs, max_length=max(500 , num*20), min_length= min(100 , num*15), length_penalty=2.0, num_beams=4, early_stopping=True)
