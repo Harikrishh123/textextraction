@@ -31,7 +31,8 @@ def abstractive_summarizer(text, num):
     return summary
 
 def nltk_tokenizer(txt, num):
-    nltk.download('punkt_tab')    
+    nltk.download('punkt_tab')
+    nltk.download('stopwords')
     freq = defaultdict(int)
     words = word_tokenize(txt)
     sentences = sent_tokenize(txt)
