@@ -15,14 +15,12 @@ from nltk.stem import PorterStemmer
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 import heapq
 
-model = T5ForConditionalGeneration.from_pretrained("t5-small")
-tokenizer = T5Tokenizer.from_pretrained("t5-small")
-
-
 
 def abstractive_summarizer(text, num):
 
     input_text = "summarize: " + text.strip().replace("\n", " ")
+    model = T5ForConditionalGeneration.from_pretrained("t5-small")
+    tokenizer = T5Tokenizer.from_pretrained("t5-small")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     inputs = tokenizer.encode(input_text, return_tensors="pt", max_length=1024, truncation=True).to(device)
