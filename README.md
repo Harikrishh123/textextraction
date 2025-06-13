@@ -45,6 +45,12 @@ A Streamlit-based web application that summarizes text using:
 <img src="screenshots/summary_abstract.png" width="700"/>
 </details>
 
+<details>
+<summary> Format Methods</summary>
+<br>
+<img src="screenshots/format_methods.png" width="700"/>
+</details>
+
 ##  Installation & Setup Instructions
 
 ###  1. Clone the Repository
