@@ -1,6 +1,3 @@
-import os
-os.environ["STREAMLIT_WATCH_FILE_SYSTEM"] = "false"
-
 import re , streamlit as st
 from collections import defaultdict
 
@@ -16,9 +13,12 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import heapq
 
 
+
+
 def abstractive_summarizer(text, model, tokenizer, num):
     input_text = "summarize: " + text.strip().replace("\n", " ")
-    
+
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     inputs = tokenizer.encode(input_text, return_tensors="pt", max_length=1024, truncation=True).to(device)
@@ -100,80 +100,101 @@ def spacy_tokenizer(txt, num):
     summary = ' '.join(sente)
     return summary
                         
-    
+
+def apply_formatting(text, fmt):
+    if fmt == "Bold":
+        return f"**{text}**"
+    elif fmt == "Italic":
+        return f"*{text}*"
+    elif fmt == "Upper":
+        return text.upper()
+    elif fmt == "Lower":
+        return text.lower()
+    return text
 
 def main():
     st.set_page_config(
-        page_title="Text Summarizer",      
-        page_icon="📝",                    
-        layout="wide",                 
-        initial_sidebar_state="auto"       
+        page_title="Text Summarizer",
+        page_icon="📝",
+        layout="wide",
+        initial_sidebar_state="auto"
     )
 
-    
     st.title("Text Summarizer App")
     activities = ["Select an option", "Extract Summarization", "Abstract Summarization"]
     choice = st.sidebar.selectbox("Select Summarization Method:", activities)
-    # print(choice)
+
+    if "summary_text" not in st.session_state:
+        st.session_state.summary_text = ""
+    if "format_choice" not in st.session_state:
+        st.session_state.format_choice = "Select an option"
     
+    if "last_choice" not in st.session_state:
+        st.session_state.last_choice = ""
+
+    if choice != st.session_state.last_choice:
+        st.session_state.summary_text = ""
+        st.session_state.last_choice = choice
+
     if choice == "Select an option":
         st.warning("Select the summarization method!")
-        
-    if choice == "Extract Summarization":
 
+    if choice == "Extract Summarization":
         txt = st.text_area("Enter the input text", height=300)
-        text = re.sub(r'\[[0-9]*\]', '' , txt)
-        text = re.sub(r'[^\w,.\s]', '', text)
-        text = re.sub(r'[A-Z]\Z', "", text)
-        text = re.sub(r'\s+', ' ', text)
-        text = text.strip()
         types = ["Select an option", "NLTK", "SPACY"]
         s_choice = st.selectbox("Summary choice", types)
-        num = st.number_input("Number of sentences in summary", min_value=1 , max_value=10 , value=3)
-        # print(num)
+        num = st.number_input("Number of sentences in summary", min_value=1, max_value=10, value=3)
+
         if st.button("Summarize the text"):
             if not txt.strip():
                 st.warning("Enter the input text!")
                 return
             if s_choice == "Select an option":
-                st.warning("Select the option above!")
-            
+                st.warning("Select the summarizer type.")
+                return
+            text = re.sub(r'\[[0-9]*\]', '', txt)
+            text = re.sub(r'[^\w,.\s]', '', text)
+            text = re.sub(r'[A-Z]\Z', "", text)
+            text = re.sub(r'\s+', ' ', text).strip()
             if s_choice == "NLTK":
-                summary = nltk_tokenizer(text, int(num))
-                st.header("Summary using NLTK:")
-                # print(summary)
-                st.write(summary)
+                st.session_state.summary_text = nltk_tokenizer(text, int(num))
+            elif s_choice == "SPACY":
+                st.session_state.summary_text = spacy_tokenizer(text, int(num))
+
+        if st.session_state.summary_text:
+            st.subheader("Summary:")
+            st.session_state.summary_text = st.text_area("Edit Summary", value=st.session_state.summary_text, height=200, key="summary_editor")
+            ch = st.radio("Select the format option", ["Select an option", "Bold", "Italic", "Upper", "Lower"], key="format_choice")
+            st.markdown("**Formatted Output:**")
+            st.markdown(apply_formatting(st.session_state.summary_text, ch))
             
-            if s_choice == "SPACY":
-                summary = spacy_tokenizer(text, int(num))
-                # print("Hello")
-                st.header("Summary using SPACY:")
-                st.write(summary)
-    
+    # st.session_state.summary_text = ""
     if choice == "Abstract Summarization":
         txt = st.text_area("Enter the input text", height=300)
-        
-        text = re.sub(r'\[[0-9]*\]', '' , txt)
-        text = re.sub(r'[^\w,.\s]', '', text)
-        text = re.sub(r'[A-Z]\Z', "", text)
-        text = re.sub(r'\s+', ' ', text)
-        text = text.strip()
-        
-        num = st.number_input("Number of sentences in summary", min_value=1 , max_value=10 , value=3)
-        
+        num = st.number_input("Number of sentences in summary", min_value=1, max_value=10, value=3)
+        # st.button("Summarize_the")
+        # st.session_state.summary_text = ""
+        flag  = 0
         if st.button("Summarize the text"):
-            
             if not txt.strip():
                 st.warning("Enter the input text!")
                 return
+        
+            text = re.sub(r'\[[0-9]*\] | [0-9]+\.', '', txt)
+            text = re.sub(r'[^\w,.\s]', '', text)
+            text = re.sub(r'[A-Z]\Z', "", text)
+            text = re.sub(r'\s+', ' ', text).strip()
             tokenizer = AutoTokenizer.from_pretrained("t5-base")
-            model = AutoModelForSeq2SeqLM.from_pretrained("t5-base", device_map="auto" , torch_dtype=torch.float32)
-            summary = abstractive_summarizer(text, model, tokenizer, num)
-            st.header("Abstractive Summary :")
-                # print(summary)
-            st.write(summary)
-              
+            model = AutoModelForSeq2SeqLM.from_pretrained("t5-base")
+            flag = 1
+            st.session_state.summary_text = abstractive_summarizer(text, model, tokenizer, num)
+        # print(session_state.summary_text)
+        if st.session_state.summary_text:
+            st.subheader("Abstractive Summary:")
+            st.session_state.summary_text = st.text_area("Edit Summary", value=st.session_state.summary_text, height=200, key="abstract_editor")
+            format_choice = st.radio("Select the format option", ["Select an option", "Bold", "Italic", "Upper", "Lower"], key="format_choice")
+            st.markdown("**Formatted Output:**")
+            st.markdown(apply_formatting(st.session_state.summary_text, format_choice))   
 
 if __name__ == '__main__' :
     main()
-    
