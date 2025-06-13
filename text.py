@@ -14,6 +14,7 @@ import heapq
 
 
 
+
 def abstractive_summarizer(text, model, tokenizer, num):
     input_text = "summarize: " + text.strip().replace("\n", " ")
 
@@ -134,6 +135,8 @@ def main():
     if choice != st.session_state.last_choice:
         st.session_state.summary_text = ""
         st.session_state.last_choice = choice
+    
+    
 
     if choice == "Select an option":
         st.warning("Select the summarization method!")
@@ -143,6 +146,13 @@ def main():
         types = ["Select an option", "NLTK", "SPACY"]
         s_choice = st.selectbox("Summary choice", types)
         num = st.number_input("Number of sentences in summary", min_value=1, max_value=10, value=3)
+        
+        if "option_choice" not in st.session_state:
+            st.session_state.option_choice = ""
+
+        if s_choice != st.session_state.option_choice:
+            st.session_state.summary_text = ""
+            st.session_state.option_choice = s_choice
 
         if st.button("Summarize the text"):
             if not txt.strip():
@@ -151,7 +161,7 @@ def main():
             if s_choice == "Select an option":
                 st.warning("Select the summarizer type.")
                 return
-            text = re.sub(r'\[[0-9]*\] | [0-9]\.', '', txt)
+            text = re.sub(r'\[[0-9]*\]', '', txt)
             text = re.sub(r'[^\w,.\s]', '', text)
             text = re.sub(r'[A-Z]\Z', "", text)
             text = re.sub(r'\s+', ' ', text).strip()
@@ -161,18 +171,17 @@ def main():
                 st.session_state.summary_text = spacy_tokenizer(text, int(num))
 
         if st.session_state.summary_text:
-            st.subheader("Summary:")
+            st.subheader(f"Summary using {st.session_state.option_choice}:")
             st.session_state.summary_text = st.text_area("Edit Summary", value=st.session_state.summary_text, height=200, key="summary_editor")
             ch = st.radio("Select the format option", ["Select an option", "Bold", "Italic", "Upper", "Lower"], key="format_choice")
             st.markdown("**Formatted Output:**")
             st.markdown(apply_formatting(st.session_state.summary_text, ch))
             
-    # st.session_state.summary_text = ""
+
     if choice == "Abstract Summarization":
         txt = st.text_area("Enter the input text", height=300)
         num = st.number_input("Number of sentences in summary", min_value=1, max_value=10, value=3)
-        # st.button("Summarize_the")
-        # st.session_state.summary_text = ""
+
         flag  = 0
         if st.button("Summarize the text"):
             if not txt.strip():
