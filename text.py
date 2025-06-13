@@ -151,7 +151,7 @@ def main():
             if s_choice == "Select an option":
                 st.warning("Select the summarizer type.")
                 return
-            text = re.sub(r'\[[0-9]*\]', '', txt)
+            text = re.sub(r'\[[0-9]*\] | [0-9]\.', '', txt)
             text = re.sub(r'[^\w,.\s]', '', text)
             text = re.sub(r'[A-Z]\Z', "", text)
             text = re.sub(r'\s+', ' ', text).strip()
