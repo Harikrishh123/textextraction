@@ -96,10 +96,3 @@ streamlit run app.py
 Then open your browser and go to:  [http://localhost:8501](http://localhost:8501)
 
 
-
-<details>
-<summary> Format Methods</summary>
-<br>
-<img src="screenshots/format_methods.png" width="700"/>
-</details>
-
