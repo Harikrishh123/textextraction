@@ -19,6 +19,31 @@ A Streamlit-based web application that summarizes text using:
 - **Editable Summary Output**
 
 ---
+## Screenshots
+
+<details>
+<summary>  Homepage</summary>
+<br>
+<img src="screenshots/home.png" width="700"/>
+</details>
+
+<details>
+<summary>Exract method</summary>
+<br>
+<img src="screenshots/extract_nltk.png" width="700"/>
+</details>
+
+<details>
+<summary> extract_summary</summary>
+<br>
+<img src="screenshots/extract_nltk.png" width="700"/>
+</details>
+
+<details>
+<summary> Abstract_method</summary>
+<br>
+<img src="screenshots/summary_abstract.png" width="700"/>
+</details>
 
 ##  Installation & Setup Instructions
 
@@ -64,13 +89,11 @@ streamlit run app.py
 
 Then open your browser and go to:  [http://localhost:8501](http://localhost:8501)
 
-## Screenshots
 
-<div style="display: flex; overflow-x: auto;">
-  <img src="screenshots/home.png" width="400" style="margin-right: 10px;" />
-  <img src="screenshots/extract_nltk.png" width="400" style="margin-right: 10px;" />
-  <img src="screenshots/summary_nltk.png" width="400" />
-  <img src="screenshots/summary_abstract.png" width="400" />
-  <img src="screenshots/format_methods.png" width="400" />
-</div>
+
+<details>
+<summary> Format Methods</summary>
+<br>
+<img src="screenshots/format_methods.png" width="700"/>
+</details>
 
